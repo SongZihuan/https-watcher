@@ -26,21 +26,21 @@ func Run() error {
 		tlsState, err := getCertificateRetry(url.URL, url.Name)
 		if err != nil {
 			logger.Errorf("请求 %s 出现异常：%s", url.Name, err.Error())
-			notify.NewErrorRecord(url.Name, url.URL, err.Error())
+			notify.NewErrorRecord(url.Name, url.URL, err.Error(), url.Mark)
 		} else if len(tlsState.PeerCertificates) == 0 {
 			logger.Errorf("请求 %s 出现异常：证书链为空", url.Name)
-			notify.NewErrorRecord(url.Name, url.URL, "证书链为空")
+			notify.NewErrorRecord(url.Name, url.URL, "证书链为空", url.Mark)
 		} else {
 			logger.Infof("开始处理 %s 证书", url.Name)
 
 			if now.After(tlsState.PeerCertificates[0].NotAfter) {
 				// 证书已过期
 				logger.Infof("%s 已过期", url.Name)
-				notify.NewOutOfDateRecord(url.Name, url.URL, 0)
+				notify.NewOutOfDateRecord(url.Name, url.URL, 0, url.Mark)
 			} else if deadline := tlsState.PeerCertificates[0].NotAfter.Sub(now); deadline <= url.DeadlineDuration {
 				// 证书即将过期
 				logger.Infof("%s 即将过期", url.Name)
-				notify.NewOutOfDateRecord(url.Name, url.URL, deadline)
+				notify.NewOutOfDateRecord(url.Name, url.URL, deadline, url.Mark)
 			} else {
 				logger.Infof("%s 正常", url.Name)
 			}

@@ -22,6 +22,7 @@ type urlRecord struct {
 	Status   int
 	Deadline time.Duration
 	ErrorMsg string
+	Mark     string
 }
 
 var startTime time.Time
@@ -43,7 +44,7 @@ func InitNotify() error {
 	return nil
 }
 
-func NewOutOfDateRecord(name string, url string, deadline time.Duration) {
+func NewOutOfDateRecord(name string, url string, deadline time.Duration, mark string) {
 	if name == "" {
 		name = url
 	}
@@ -53,10 +54,11 @@ func NewOutOfDateRecord(name string, url string, deadline time.Duration) {
 		URL:      url,
 		Status:   StatusOutOfDate,
 		Deadline: deadline,
+		Mark:     mark,
 	})
 }
 
-func NewErrorRecord(name string, url string, err string) {
+func NewErrorRecord(name string, url string, err string, mark string) {
 	if name == "" {
 		name = url
 	}
@@ -66,6 +68,7 @@ func NewErrorRecord(name string, url string, err string) {
 		URL:      url,
 		Status:   StatusError,
 		ErrorMsg: err,
+		Mark:     mark,
 	})
 }
 
@@ -88,10 +91,16 @@ func SendOutOfDateNotify() {
 
 		if record.Deadline <= 0 {
 			expiredCount += 1
-			res.WriteString(fmt.Sprintf("- %s 已过期\n", record.Name))
+			res.WriteString(fmt.Sprintf("- %s 已过期", record.Name))
 		} else {
 			expiringSoonCount += 1
-			res.WriteString(fmt.Sprintf("- %s 剩余时间: %s\n", record.Name, utils.TimeDurationToStringCN(record.Deadline)))
+			res.WriteString(fmt.Sprintf("- %s 剩余时间: %s", record.Name, utils.TimeDurationToStringCN(record.Deadline)))
+		}
+
+		if len(record.Mark) != 0 {
+			res.WriteString(fmt.Sprintf(" (%s)\n", record.Mark))
+		} else {
+			res.WriteString("\n")
 		}
 
 		return true
@@ -139,7 +148,13 @@ func SendErrorNotify() {
 		}
 
 		count += 1
-		res.WriteString(fmt.Sprintf("- 检查 %s 出错: %s\n", record.Name, record.ErrorMsg))
+		res.WriteString(fmt.Sprintf("- 检查 %s 出错: %s", record.Name, record.ErrorMsg))
+
+		if len(record.Mark) != 0 {
+			res.WriteString(fmt.Sprintf(" (%s)\n", record.Mark))
+		} else {
+			res.WriteString("\n")
+		}
 
 		return true
 	})

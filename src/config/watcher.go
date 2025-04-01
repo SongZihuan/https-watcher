@@ -10,6 +10,7 @@ type URLConfig struct {
 	Name     string `yaml:"name"`
 	URL      string `yaml:"url"`
 	Deadline string `yaml:"deadline"`
+	Mark     string `yaml:"mark"`
 
 	DeadlineDuration time.Duration `yaml:"-"`
 }
