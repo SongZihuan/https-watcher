@@ -37,6 +37,8 @@ func (w *WatcherConfig) check() (err ConfigError) {
 		return NewConfigError("not any urls")
 	}
 
+	urlMap := make(map[string]bool, len(w.URLs))
+
 	for _, url := range w.URLs {
 		if !utils.IsValidHTTPSURL(url.URL) {
 			return NewConfigError(fmt.Sprintf("'%s' is not a valid https url", url))
@@ -45,6 +47,12 @@ func (w *WatcherConfig) check() (err ConfigError) {
 		url.DeadlineDuration = utils.ReadTimeDuration(url.Deadline)
 		if url.DeadlineDuration <= 0 {
 			return NewConfigError(fmt.Sprintf("'%s' is not a valid deadline", url.Deadline))
+		}
+
+		if yes, ok := urlMap[url.URL]; yes && ok {
+			_ = NewConfigWarning(fmt.Sprintf("url '%s' repeat", url.URL))
+		} else {
+			urlMap[url.URL] = true
 		}
 	}
 

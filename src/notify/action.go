@@ -91,10 +91,10 @@ func SendOutOfDateNotify() {
 
 		if record.Deadline <= 0 {
 			expiredCount += 1
-			res.WriteString(fmt.Sprintf("- %s 已过期", record.Name))
+			res.WriteString(fmt.Sprintf("- %s (url: %s) 已过期", record.Name, record.URL))
 		} else {
 			expiringSoonCount += 1
-			res.WriteString(fmt.Sprintf("- %s 剩余时间: %s", record.Name, utils.TimeDurationToStringCN(record.Deadline)))
+			res.WriteString(fmt.Sprintf("- %s (url: %s) 剩余时间: %s", record.Name, record.URL, utils.TimeDurationToStringCN(record.Deadline)))
 		}
 
 		if len(record.Mark) != 0 {
@@ -148,7 +148,7 @@ func SendErrorNotify() {
 		}
 
 		count += 1
-		res.WriteString(fmt.Sprintf("- 检查 %s 出错: %s", record.Name, record.ErrorMsg))
+		res.WriteString(fmt.Sprintf("- 检查 %s (%s) 出错: %s", record.Name, record.URL, record.ErrorMsg))
 
 		if len(record.Mark) != 0 {
 			res.WriteString(fmt.Sprintf(" (%s)\n", record.Mark))
